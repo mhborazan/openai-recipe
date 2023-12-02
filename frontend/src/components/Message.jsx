@@ -1,4 +1,6 @@
 import React from "react";
+import { createRoot } from "react-dom/client";
+import Markdown from "react-markdown";
 import "./message.css";
 export default function Message({ message = "", date = "", me }) {
   return (
@@ -7,14 +9,19 @@ export default function Message({ message = "", date = "", me }) {
       style={
         !me
           ? {
-              backgroundColor: "#357315",
-              color: "white",
+              backgroundColor: "#183D3D",
+              color: "93B1A6",
               alignItems: "start",
             }
-          : { backgroundColor: "#4b494c", color: "#b3c2ce", alignItems: "end" }
+          : { backgroundColor: "#040D12", color: "#93B1A6", alignItems: "end" }
       }
     >
-      <div className="message">{message}</div>
+      {!me ? (
+        <Markdown>{message}</Markdown>
+      ) : (
+        <div className="message">{message}</div>
+      )}
+
       <div className="date">{date}</div>
     </div>
   );
