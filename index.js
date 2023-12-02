@@ -1,15 +1,4 @@
 import dotenv from "dotenv";
-import express from "express";
-import { Server } from "socket.io";
-import http from "http";
-const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: "*",
-    methods: ["GET", "POST"],
-  },
-});
 dotenv.config();
 
 import { PromptTemplate } from "langchain/prompts";
@@ -22,7 +11,6 @@ import { SupabaseVectorStore } from "langchain/vectorstores/supabase";
 const openAIApiKey = process.env.OPENAI_API_KEY;
 const sbApiKey = process.env.SUPABASE_API_KEY;
 const sbUrl = process.env.SUPABASE_URL;
-const port = process.env.PORT;
 const embeddings = new OpenAIEmbeddings({ openAIApiKey });
 const client = createClient(sbUrl, sbApiKey);
 const vectorStore = new SupabaseVectorStore(embeddings, { client });
@@ -39,7 +27,17 @@ const standaloneQuestionPrompt = PromptTemplate.fromTemplate(
   standaloneQuestionTemplate
 );
 
-const answerTemplate = `Bir dostane ve hevesli yemek tarifi uzmanı rolünü benimseyin, tüm beceri seviyeleri için detaylı, kişiye özel tarifler ve açık pişirme teknikleri sağlamaya odaklanın. Verilen bağlama bakarak cevap oluştur. Aşağıdaki bağlamı kullan. Malzemeler hakkında bilgiler sunun, çeşitli diyet ihtiyaçlarını ele alın ve kullanıcıların mutfak bilgisini ilginç gerçeklerle zenginleştirin. Yanıtları kişiselleştirin, denemeleri teşvik edin ve pişirme ipuçları paylaşın. Gıda güvenliğini koruyun, kültürel duyarlılığı gösterin ve sağlıklı yemeyi teşvik edin. Görsel yardımlarla desteklenen öz ve net talimatlar sağlayın. Tarif paylaşımını teşvik ederek topluluk ruhu oluşturun ve sürekli iyileştirme için kullanıcı geri bildirimlerini entegre edin.
+const answerTemplate = `Bir dostane ve hevesli yemek tarifi uzmanı rolünü benimseyin,
+ tüm beceri seviyeleri için detaylı, kişiye özel tarifler ve açık pişirme teknikleri sağlamaya odaklanın.
+  Verilen bağlama bakarak cevap oluştur. Aşağıdaki bağlamı kullan. Malzemeler hakkında bilgiler sunun,
+   çeşitli diyet ihtiyaçlarını ele alın ve kullanıcıların mutfak bilgisini ilginç gerçeklerle zenginleştirin.
+    Yanıtları kişiselleştirin, denemeleri teşvik edin ve pişirme ipuçları paylaşın. Gıda güvenliğini koruyun,
+     kültürel duyarlılığı gösterin ve sağlıklı yemeyi teşvik edin.
+      Tarif paylaşımını teşvik ederek topluluk ruhu oluşturun ve sürekli iyileştirme için kullanıcı geri bildirimlerini entegre edin.
+      Chat geçmişindeki verileri de dikkate al. Soru yemek tarifi ile ilgili değilse normal bir arkadaş gibi sohbet et
+      ve kullanıcıyı yemek tarifi isteemsi için teşvik et.
+----------------
+Chat Geçmişi: {chatHistory}
 ----------------
 Bağlam: {context}
 ----------------
@@ -55,41 +53,19 @@ const standaloneQuestionChain = standaloneQuestionPrompt
 
 const answerChain = answerPropmt.pipe(llm).pipe(new StringOutputParser());
 
-const run = async (question) => {
+const run = async (question, chatHistory) => {
   const response = await standaloneQuestionChain.invoke({
     question: question,
   });
   let context = response[0].pageContent;
   console.log(context);
-
   const aiResponse = await answerChain.invoke({
     context,
     question: question,
+    chatHistory: chatHistory,
   });
   console.log(aiResponse);
   return aiResponse;
 };
 
-io.on("connection", (socket) => {
-  console.log("a user connected", socket.id);
-  socket.on("disconnect", () => {
-    console.log("user disconnected");
-  });
-
-  socket.on("chat message", async (msg) => {
-    const date = new Date();
-    io.emit("chat message", { msg: msg, id: socket.id });
-    const response = await run(msg.message);
-    io.emit("chat message", {
-      msg: {
-        message: response,
-        date: `${date.getHours()}:${date.getMinutes()}`,
-      },
-      id: "ai",
-    });
-  });
-});
-
-server.listen(port, () => {
-  console.log("app is running on port " + port);
-});
+export default run;

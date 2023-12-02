@@ -1,45 +1,43 @@
 import React, { useEffect, useRef, useState } from "react";
 import "./chat.css";
 import Message from "./Message";
-import { io } from "socket.io-client";
-const socket = io("http://localhost:3000");
+import axios from "axios";
+import UID from "uniquebrowserid";
+const myid = new UID().completeID();
 
 export default function Chat() {
   const [messages, setMessages] = useState([]);
   const inputRef = useRef();
   const [input, setInput] = useState("");
-  const onSubmit = (event) => {
+  const onSubmit = async (event) => {
     const date = new Date();
+    setMessages((prev) => [
+      ...prev,
+      {
+        message: input,
+        date: `${date.getHours()}:${date.getMinutes()}`,
+        id: "user",
+      },
+    ]);
+    console.log(myid);
     event.preventDefault();
-    socket
-      .timeout(5000)
-      .emit(
-        "chat message",
-        { message: input, date: `${date.getHours()}:${date.getMinutes()}` },
-        () => {}
-      );
+    const respond = await axios.post("http://127.0.0.1:9000/question", {
+      question: input,
+      date: `${date.getHours()}:${date.getMinutes()}`,
+      unique: "u_" + myid,
+    });
+    setMessages((prev) => [
+      ...prev,
+      {
+        message: respond.data.message,
+        date: `${date.getHours()}:${date.getMinutes()}`,
+        id: "ai",
+      },
+    ]);
     inputRef.current.value = "";
     setInput.value = "";
   };
 
-  useEffect(() => {
-    socket.connect();
-
-    return () => {
-      socket.disconnect();
-    };
-  }, []);
-
-  useEffect(() => {
-    function onMessage(value) {
-      setMessages([...messages, value]);
-    }
-    socket.on("chat message", onMessage);
-
-    return () => {
-      socket.off("chat message", onMessage);
-    };
-  }, [messages]);
   return (
     <>
       <div className="container">
@@ -47,10 +45,10 @@ export default function Chat() {
           {messages.map((e, i) => {
             return (
               <Message
-                message={e.msg.message}
-                date={e.msg.date}
-                me={socket.id == e.id}
+                message={e.message}
+                date={e.date}
                 key={i}
+                me={e.id == "user"}
               />
             );
           })}
