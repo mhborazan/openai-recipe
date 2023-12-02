@@ -6,8 +6,6 @@ const app = express();
 import fs from "fs";
 dotenv.config();
 
-const chatHistory = {};
-
 // Middlewares
 app.use(express.json());
 app.use(express.static("public"));
@@ -20,16 +18,9 @@ app.use(
 
 app.post("/question", async (req, res) => {
   const date = new Date();
-  let { question, unique } = req.body;
-  let answer = await run(question, chatHistory[unique]);
-  if (unique in chatHistory) {
-    chatHistory[unique].push("user: " + question);
-    chatHistory[unique].push("ai: " + answer);
-  } else {
-    chatHistory[unique] = [];
-    chatHistory[unique].push("user: " + question);
-    chatHistory[unique].push("ai: " + answer);
-  }
+  let { question, chatHistory } = req.body;
+  let answer = await run(question, chatHistory);
+
   res.send({
     message: answer,
     date: `${date.getHours()}:${date.getMinutes()}`,
