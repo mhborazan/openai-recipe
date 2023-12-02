@@ -1,0 +1,44 @@
+.container {
+    height: 80vh;
+    width: 500px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 10px;
+
+}
+
+.chat-area {
+    display: flex;
+    flex-direction: column;
+    background-color: black;
+    height: 85%;
+    width: 100%;
+    overflow-y: scroll;
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+}
+
+.input-area {
+    background-color: #2b2b2b;
+    height: 15%;
+    width: 100%;
+    padding: 7%;
+    border-bottom-right-radius: 10px;
+    border-bottom-left-radius: 10px;
+}
+
+.input-area input {
+    width: 75%;
+    margin-right: 5%;
+    height: 50px;
+    padding: 12px 20px;
+
+}
+
+
+.input-area button {
+    width: 20%;
+    height: 50px
+}
