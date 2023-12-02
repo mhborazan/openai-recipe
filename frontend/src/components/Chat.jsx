@@ -6,6 +6,7 @@ import UID from "uniquebrowserid";
 const myid = new UID().completeID();
 
 export default function Chat() {
+  const [chatHistory, setChatHistory] = useState("");
   const [messages, setMessages] = useState([]);
   const inputRef = useRef();
   const [input, setInput] = useState("");
@@ -19,12 +20,13 @@ export default function Chat() {
         id: "user",
       },
     ]);
-    console.log(myid);
     event.preventDefault();
+    inputRef.current.value = "";
+    inputRef.current.disabled = true;
     const respond = await axios.post("http://127.0.0.1:9000/question", {
       question: input,
       date: `${date.getHours()}:${date.getMinutes()}`,
-      unique: "u_" + myid,
+      chatHistory: chatHistory,
     });
     setMessages((prev) => [
       ...prev,
@@ -34,7 +36,11 @@ export default function Chat() {
         id: "ai",
       },
     ]);
-    inputRef.current.value = "";
+    setChatHistory(
+      (prev) =>
+        prev + `"user": ${input} \n\n "ai": ${respond.data.message} \n\n`
+    );
+    inputRef.current.disabled = false;
     setInput.value = "";
   };
 
@@ -60,11 +66,10 @@ export default function Chat() {
               onChange={(i) => setInput(i.target.value)}
               ref={inputRef}
             />
-            <button type="submit">Send</button>
+            <button type="submit">Tarif Sor</button>
           </form>
         </div>
       </div>
-      ;
     </>
   );
 }
