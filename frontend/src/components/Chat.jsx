@@ -23,7 +23,7 @@ export default function Chat() {
     event.preventDefault();
     inputRef.current.value = "";
     inputRef.current.disabled = true;
-    const respond = await axios.post("http://127.0.0.1:9000/question", {
+    const respond = await axios.post("http://localhost:9000/question", {
       question: input,
       date: `${date.getHours()}:${date.getMinutes()}`,
       chatHistory: chatHistory,
