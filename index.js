@@ -19,7 +19,7 @@ const retriver = vectorStore.asRetriever({ k: 1 });
 const llm = new ChatOpenAI({
   openAIApiKey,
   verbose: false,
-  modelName: "gpt-4-1106-preview",
+  modelName: "gpt-3.5-turbo-1106",
 });
 
 const userQuestion =

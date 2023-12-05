@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "upload": "node utils/fileLoader.js"
+    "upload": "node utils/fileLoader.js",
+    "ui": "cd frontend && npx vite --port 3000"
   },
   "author": "",
   "license": "ISC",
