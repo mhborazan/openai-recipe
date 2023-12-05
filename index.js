@@ -16,7 +16,11 @@ const client = createClient(sbUrl, sbApiKey);
 const vectorStore = new SupabaseVectorStore(embeddings, { client });
 const retriver = vectorStore.asRetriever({ k: 1 });
 
-const llm = new ChatOpenAI({ openAIApiKey, verbose: true });
+const llm = new ChatOpenAI({
+  openAIApiKey,
+  verbose: false,
+  modelName: "gpt-3.5-turbo-1106",
+});
 
 const userQuestion =
   "Misafirlerim gelecek ve ne yapacağımı bilmiyorum. Onlara lezzetli bir tatlı ikram etmek istiyorum. Muzlu puding nasıl yapabilirim?";
